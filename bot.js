@@ -36,6 +36,12 @@ function startBot() {
       setTimeout(() => bot.setControlState('jump', false), 300)
     }, 30000)
   })
+  
+    // message every 2 minutes
+    setInterval(() => {
+      bot.chat('ISMAIL0605 the goat 🐐🔥')
+    }, 120000)
+  })
 
   bot.on('kicked', (reason) => {
     console.log('❌ Kicked:', reason?.toString())
