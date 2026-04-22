@@ -1,54 +1,58 @@
 const mineflayer = require('mineflayer')
 
-const PASSWORD = '12345678' // 🔑 CHANGE THIS
+const HOST = '2xrduel.aternos.me'
+const PORT = 25565
+const USERNAME = '2XR_KILLER'
+const PASSWORD = '12345678'
+
+let reconnectDelay = 5000
 
 function startBot() {
   const bot = mineflayer.createBot({
-    host: '2xrduel.aternos.me',
-    port: 25565,
-    username: '2XR_KILLER'
+    host: HOST,
+    port: PORT,
+    username: USERNAME,
+    version: false
+  })
+
+  bot.on('login', () => {
+    console.log('🔵 Logging in...')
   })
 
   bot.on('spawn', () => {
-    console.log('✅ Bot joined server')
+    console.log('✅ Bot spawned')
 
-    // Wait for server message then login/register
+    reconnectDelay = 5000 // reset delay after success
+
+    // Safe login/register timing
     setTimeout(() => {
       bot.chat(`/register ${PASSWORD} ${PASSWORD}`)
       bot.chat(`/login ${PASSWORD}`)
-    }, 3000)
+    }, 5000)
 
-    // Anti-AFK movement
+    // Safe anti-AFK (low frequency)
     setInterval(() => {
-      const actions = ['forward', 'back', 'left', 'right']
-      const action = actions[Math.floor(Math.random() * actions.length)]
-
-      bot.setControlState(action, true)
-      setTimeout(() => bot.setControlState(action, false), 2000)
-
-      // jump
       bot.setControlState('jump', true)
-      setTimeout(() => bot.setControlState('jump', false), 500)
-
-    }, 20000)
+      setTimeout(() => bot.setControlState('jump', false), 300)
+    }, 30000)
   })
 
-  // Smarter login detection
-  bot.on('messagestr', (msg) => {
-    if (msg.includes('/register')) {
-      bot.chat(`/register ${PASSWORD} ${PASSWORD}`)
-    }
-    if (msg.includes('/login')) {
-      bot.chat(`/login ${PASSWORD}`)
-    }
+  bot.on('kicked', (reason) => {
+    console.log('❌ Kicked:', reason?.toString())
+  })
+
+  bot.on('error', (err) => {
+    console.log('⚠️ Error:', err.message)
   })
 
   bot.on('end', () => {
-    console.log('🔁 Reconnecting in 5s...')
-    setTimeout(startBot, 5000)
-  })
+    console.log(`🔁 Disconnected → retry in ${reconnectDelay / 1000}s`)
 
-  bot.on('error', err => console.log('❌ Error:', err))
+    setTimeout(() => {
+      reconnectDelay = Math.min(reconnectDelay * 1.5, 60000)
+      startBot()
+    }, reconnectDelay)
+  })
 }
 
 startBot()
