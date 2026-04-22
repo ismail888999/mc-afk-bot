@@ -1,42 +1,28 @@
 const mineflayer = require('mineflayer')
 
-const HOST = '2xrduel.aternos.me'
-const PORT = 25565
-const USERNAME = '2XR_KILLER'
-const PASSWORD = '12345678'
-
-let reconnectDelay = 5000
-
 function startBot() {
   const bot = mineflayer.createBot({
-    host: HOST,
-    port: PORT,
-    username: USERNAME,
+    host: '2xrduel.aternos.me',
+    port: 25565,
+    username: '2XR_KILLER',
     version: false
   })
 
-  bot.on('login', () => {
-    console.log('🔵 Logging in...')
-  })
-
   bot.on('spawn', () => {
-    console.log('✅ Bot spawned')
+    console.log('✅ Bot joined')
 
-    reconnectDelay = 5000 // reset delay after success
-
-    // Safe login/register timing
+    // login/register
     setTimeout(() => {
-      bot.chat(`/register ${PASSWORD} ${PASSWORD}`)
-      bot.chat(`/login ${PASSWORD}`)
+      bot.chat('/register 12345678 12345678')
+      bot.chat('/login 12345678')
     }, 5000)
 
-    // Safe anti-AFK (low frequency)
+    // anti-AFK
     setInterval(() => {
       bot.setControlState('jump', true)
       setTimeout(() => bot.setControlState('jump', false), 300)
     }, 30000)
-  })
-  
+
     // message every 2 minutes
     setInterval(() => {
       bot.chat('ISMAIL0605 the goat 🐐🔥')
@@ -52,12 +38,8 @@ function startBot() {
   })
 
   bot.on('end', () => {
-    console.log(`🔁 Disconnected → retry in ${reconnectDelay / 1000}s`)
-
-    setTimeout(() => {
-      reconnectDelay = Math.min(reconnectDelay * 1.5, 60000)
-      startBot()
-    }, reconnectDelay)
+    console.log('🔁 Reconnecting in 10s...')
+    setTimeout(() => startBot(), 10000)
   })
 }
 
