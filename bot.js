@@ -39,7 +39,7 @@ function startBot() {
 
   bot.on('end', () => {
     console.log('🔁 Reconnecting in 10s...')
-    setTimeout(() => startBot(), 10000)
+    setTimeout(() => startBot(), 1000)
   })
 }
 
